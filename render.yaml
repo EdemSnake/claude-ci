@@ -14,10 +14,9 @@ services:
           property: connectionString
     autoDeploy: true
 
-  - type: static
+  - type: web
     name: react-frontend
     env: static
-    plan: free
     buildCommand: "npm install && npm run build"
     staticPublishPath: "build"
     rootDir: frontend
@@ -28,4 +27,4 @@ services:
 
 databases:
   - name: rails-db
-    plan: free 
+    plan: free

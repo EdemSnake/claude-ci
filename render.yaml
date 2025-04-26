@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: rails-backend
+    env: ruby
+    plan: free
+    buildCommand: "bundle install && bundle exec rake db:migrate"
+    startCommand: "bundle exec rails server -p 10000"
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rails-db
+          property: connectionString
+    autoDeploy: true
+
+  - type: static
+    name: react-frontend
+    env: static
+    plan: free
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: "build"
+    rootDir: frontend
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://rails-backend.onrender.com/api
+    autoDeploy: true
+
+databases:
+  - name: rails-db
+    plan: free 

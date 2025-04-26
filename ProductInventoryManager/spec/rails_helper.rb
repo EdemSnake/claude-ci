@@ -1,6 +1,5 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
-require_relative '../lib/logger_patch'
 require 'active_record'
 require 'sqlite3'
 require_relative '../config/environment'

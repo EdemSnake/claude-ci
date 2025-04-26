@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-# Load our logger patch to fix compatibility issues with Ruby 3.1.6
-require_relative '../lib/logger_patch'
 
 APP_PATH = File.expand_path('../config/application', __dir__)
 require_relative "../config/boot"
+require "logger"
 require "rails/commands"

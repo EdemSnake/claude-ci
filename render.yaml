@@ -3,6 +3,7 @@ services:
     name: rails-backend
     env: ruby
     plan: free
+    rootDir: ProductInventoryManager
     buildCommand: "bundle install && bundle exec rake db:migrate"
     startCommand: "bundle exec rails server -p 10000"
     envVars:

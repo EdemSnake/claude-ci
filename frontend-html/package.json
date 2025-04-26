@@ -1,0 +1,11 @@
+{
+  "name": "product-inventory-manager-html",
+  "version": "1.0.0",
+  "description": "Product Inventory Manager HTML Frontend",
+  "scripts": {
+    "start": "http-server -p 3001"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+} 

@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+APP_PATH = File.expand_path('../config/application', __dir__)
+require_relative "../config/boot"
+require_relative "../config/environment"
+
+puts "Starting Rails server on http://0.0.0.0:5000"
+require 'rack'
+require 'rack/handler/puma'
+Rack::Handler::Puma.run(Rails.application, Host: '0.0.0.0', Port: 5000)

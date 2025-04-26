@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+# Load our logger patch to fix compatibility issues with Ruby 3.1.6
+require_relative '../lib/logger_patch'
+
+# Load RSpec
+require 'rspec/core'
+require 'rspec/core/runner'
+
+# Run RSpec
+RSpec::Core::Runner.invoke

@@ -10,7 +10,7 @@ import {
 import { createProduct, updateProduct, getProduct, Product } from '../services/api';
 
 interface ProductFormProps {
-  productId: number | null;
+  productId?: number | null;
   onSaved?: () => void;
 }
 

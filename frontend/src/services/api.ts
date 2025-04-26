@@ -11,7 +11,7 @@ export interface Product {
   id?: number;
   name: string;
   description: string;
-  price: 0;
+  price: number;
   available: boolean;
 }
 

@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Paper,
   List,
-  ListItem,
-  ListItemText,
-  IconButton,
+
   Typography,
-  Divider,
+
   Chip,
   Stack,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { getProducts, deleteProduct } from '../services/api';
-import ProductForm from './ProductForm';
+import ProductInfoModal from './ProductInfoModal';
+import ProductEditModal from './ProductEditModal';
+import ProductListItem from './ProductListItem';
 
-const ProductList = () => {
+const ProductList = forwardRef((_, ref) => {
   const queryClient = useQueryClient();
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [filterAvailable, setFilterAvailable] = useState<'all' | 'available' | 'unavailable'>('all');
 
   const { data: products = [] } = useQuery({
     queryKey: ['products'],
@@ -35,41 +37,75 @@ const ProductList = () => {
     },
   });
 
+  const handleOpenInfoModal = (productId: number) => {
+    setSelectedProduct(productId);
+    setInfoModalOpen(true);
+  };
+
+  const handleCloseInfoModal = () => {
+    setInfoModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleOpenEditModal = (productId: number | null) => {
+    setSelectedProduct(productId);
+    setModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setModalOpen(false);
+    setSelectedProduct(null);
+  };
+
+  useImperativeHandle(ref, () => ({
+    openAddProductModal: () => handleOpenEditModal(null)
+  }));
+
+  const selectedProductObj = products.find(p => p.id === selectedProduct);
+
+  const filteredProducts = products.filter(product => {
+    if (filterAvailable === 'all') return true;
+    if (filterAvailable === 'available') return product.available;
+    if (filterAvailable === 'unavailable') return !product.available;
+    return true;
+  });
+
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Paper 
-        sx={{ 
-          width: '50%', 
-          borderRadius: 0,
-          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
-        <Box sx={{ 
-          p: 3, 
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-          bgcolor: 'primary.main',
-          color: 'white'
-        }}>
+    <Box sx={{ maxWidth: 1100, mx: 'auto', mt: 6 }}>
+      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ p: 3, borderBottom: '1px solid rgba(0, 0, 0, 0.12)', bgcolor: 'primary.main', color: 'white' }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <InventoryIcon />
             <Typography variant="h6" sx={{ flexGrow: 1 }}>
               Product Inventory
             </Typography>
-            <Chip 
-              label={`${products.length} items`} 
-              size="small" 
-              sx={{ 
+            <Chip
+              label={`${products.length} items`}
+              sx={{
                 bgcolor: 'rgba(255, 255, 255, 0.2)',
                 color: 'white',
-                '& .MuiChip-label': { px: 2 }
-              }} 
+                '& .MuiChip-label': { px: 2 },
+                height: 40,
+                fontSize: '1rem',
+                display: 'flex',
+                alignItems: 'center'
+              }}
             />
           </Stack>
         </Box>
-        <List sx={{ 
-          flex: 1, 
+        <Box sx={{ px: 3, pt: 2 }}>
+          <select
+            value={filterAvailable}
+            onChange={e => setFilterAvailable(e.target.value as 'all' | 'available' | 'unavailable')}
+            style={{ padding: '6px 12px', borderRadius: 4 }}
+          >
+            <option value="all">All</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </Box>
+        <List sx={{
+          maxHeight: 600,
           overflow: 'auto',
           '& .MuiListItem-root': {
             transition: 'all 0.2s ease',
@@ -78,98 +114,33 @@ const ProductList = () => {
             }
           }
         }}>
-          {products.map((product) => (
-            <React.Fragment key={product.id}>
-              <ListItem
-                sx={{
-                  px: 3,
-                  py: 2,
-                  cursor: 'pointer',
-                  ...(selectedProduct === product.id && {
-                    bgcolor: 'primary.light',
-                    '&:hover': {
-                      bgcolor: 'primary.light'
-                    }
-                  })
-                }}
-                onClick={() => setSelectedProduct(product.id)}
-              >
-                <ListItemText
-                  primary={
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'medium', mb: 0.5 }}>
-                      {product.name}
-                    </Typography>
-                  }
-                  secondary={
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Typography 
-                        variant="body2" 
-                        color="primary"
-                        sx={{ fontWeight: 'bold' }}
-                      >
-                        ${Number(product.price).toFixed(2)}
-                      </Typography>
-                      {product.description && (
-                        <Typography 
-                          variant="body2" 
-                          color="text.secondary"
-                          sx={{ 
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {product.description}
-                        </Typography>
-                      )}
-                    </Stack>
-                  }
-                />
-                <Stack direction="row" spacing={1}>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProduct(product.id);
-                    }}
-                    sx={{ 
-                      color: 'primary.main',
-                      '&:hover': { bgcolor: 'primary.light' }
-                    }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('Delete this product?')) {
-                        deleteMutation.mutate(product.id);
-                      }
-                    }}
-                    sx={{ 
-                      color: 'error.main',
-                      '&:hover': { bgcolor: 'error.light' }
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              </ListItem>
-              <Divider />
-            </React.Fragment>
+          {filteredProducts.map((product) => (
+            <ProductListItem
+              key={product.id}
+              product={product}
+              onClick={() => handleOpenInfoModal(product.id)}
+              onEdit={() => handleOpenEditModal(product.id)}
+              onDelete={() => {
+                if (window.confirm('Delete this product?')) {
+                  deleteMutation.mutate(product.id);
+                }
+              }}
+            />
           ))}
         </List>
       </Paper>
-
-      <Box sx={{ width: '50%', p: 3 }}>
-        <ProductForm
-          productId={selectedProduct}
-          onSaved={() => setSelectedProduct(null)}
-        />
-      </Box>
+      <ProductInfoModal
+        open={infoModalOpen}
+        onClose={handleCloseInfoModal}
+        product={selectedProductObj || null}
+      />
+      <ProductEditModal
+        open={modalOpen}
+        onClose={handleCloseEditModal}
+        productId={selectedProduct}
+      />
     </Box>
   );
-};
+});
 
 export default ProductList; 

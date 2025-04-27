@@ -6,6 +6,8 @@ import {
   Paper,
   Typography,
   Box,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 import { createProduct, updateProduct, getProduct, Product } from '../services/api';
 
@@ -22,6 +24,7 @@ const ProductForm = ({ productId, onSaved }: ProductFormProps) => {
     name: '',
     description: '',
     price: 0,
+    available: true,
   });
 
   const { data: existingProduct } = useQuery({
@@ -42,6 +45,7 @@ const ProductForm = ({ productId, onSaved }: ProductFormProps) => {
         name: '',
         description: '',
         price: 0,
+        available: true,
       });
     }
   }, [productId]);
@@ -69,6 +73,14 @@ const ProductForm = ({ productId, onSaved }: ProductFormProps) => {
     }));
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setProduct((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
   return (
     <Paper 
       elevation={0}
@@ -87,7 +99,7 @@ const ProductForm = ({ productId, onSaved }: ProductFormProps) => {
           fontWeight: 'medium'
         }}
       >
-        {isEdit ? 'Edit Product' : 'Add New Product'}
+        {isEdit ? 'Edit Product' : 'Add Product'}
       </Typography>
       <form onSubmit={handleSubmit}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -124,6 +136,17 @@ const ProductForm = ({ productId, onSaved }: ProductFormProps) => {
             fullWidth
             inputProps={{ min: 0, step: 0.01 }}
             sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!product.available}
+                onChange={handleCheckboxChange}
+                name="available"
+                color="primary"
+              />
+            }
+            label="Available"
           />
           <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <Button

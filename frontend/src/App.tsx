@@ -1,10 +1,9 @@
+import { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProductList from './components/ProductList';
-import ProductForm from './components/ProductForm';
-import ProductDetails from './components/ProductDetails';
 import Layout from './components/Layout';
 
 const theme = createTheme({
@@ -22,17 +21,22 @@ const theme = createTheme({
 const queryClient = new QueryClient();
 
 function App() {
+  const productListRef = useRef<any>(null);
+
+  const handleAddProduct = () => {
+    if (productListRef.current && productListRef.current.openAddProductModal) {
+      productListRef.current.openAddProductModal();
+    }
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Layout>
+          <Layout onAddProduct={handleAddProduct}>
             <Routes>
-              <Route path="/" element={<ProductList />} />
-              <Route path="/products/new" element={<ProductForm productId={null} />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
-              <Route path="/products/:id/edit" element={<ProductForm productId={null} />} />
+              <Route path="/" element={<ProductList ref={productListRef} />} />
             </Routes>
           </Layout>
         </Router>
